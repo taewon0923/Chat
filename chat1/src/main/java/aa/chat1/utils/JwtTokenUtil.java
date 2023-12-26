@@ -22,10 +22,17 @@ public class JwtTokenUtil {
                 .get("userName").toString();
     }
 
+    public static String getIsAdmin(String token, String secretKey) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
+                .getBody()
+                .get("isAdmin").toString();
+    }
 
-    public static String createToken(String userName, String key, Long expiredUntilMs) {
+
+    public static String createToken(String userName, boolean isAdmin, String key, Long expiredUntilMs) {
         Claims claims = Jwts.claims();
         claims.put("userName", userName);
+        claims.put("isAdmin",isAdmin);
 
         return Jwts.builder()
                 .setClaims(claims)

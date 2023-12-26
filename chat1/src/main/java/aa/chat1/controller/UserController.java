@@ -4,21 +4,20 @@ package aa.chat1.controller;
 import aa.chat1.configuration.JwtFilter;
 import aa.chat1.domain.User;
 import aa.chat1.domain.UserDetails;
+import aa.chat1.domain.dto.UserDetailRequest;
 import aa.chat1.domain.dto.UserJoinRequest;
 import aa.chat1.domain.dto.UserLoginRequest;
+import aa.chat1.handler.ChatHandler;
 import aa.chat1.service.UserService;
-import aa.chat1.utils.JwtTokenUtil;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -30,6 +29,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtFilter jwtFilter;
+    List<String> users = new ArrayList<>();
 
     @PostMapping("/join")
     public ResponseEntity<String> join(@RequestBody UserJoinRequest dto){
@@ -44,14 +44,16 @@ public class UserController {
     }
 
     @GetMapping("/main")
-    public ResponseEntity<String> mainPage(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<User> mainPage(@RequestHeader("Authorization") String token) {
         String jwtToken = token.replace("Bearer ", "");
+        Claims claims = Jwts.parser().setSigningKey("1234").parseClaimsJws(jwtToken).getBody();
+        String username = (String) claims.get("userName");
+        boolean isAdmin = (boolean) claims.get("isAdmin");
 
-            Claims claims = Jwts.parser().setSigningKey("1234").parseClaimsJws(jwtToken).getBody();
-            String username = (String) claims.get("userName");
-            return ok().body(username);
-
+        User userData = new User(username, isAdmin);
+        return ok().body(userData);
     }
+
     @GetMapping("/userList")
     public ResponseEntity<List> userList(){
         List users = userService.userList();
@@ -59,11 +61,15 @@ public class UserController {
     }
 
     @PostMapping("/userList/Detail")
-    public ResponseEntity<List<UserDetails>> userDetail(@RequestBody Map<String, String> requestBody) {
-        String id = requestBody.get("id");
+    public ResponseEntity<List<UserDetails>> userDetail(@RequestBody UserDetailRequest request) {
+        String id = request.getId();
         Long userId = Long.parseLong(id);
         List<UserDetails> users = userService.userDetail(userId);
         return ResponseEntity.ok().body(users);
     }
 
+    @GetMapping("/Chat/Users")
+    public Collection<String> ChatUserList(){
+        return userService.chatUserList();
+    }
 }

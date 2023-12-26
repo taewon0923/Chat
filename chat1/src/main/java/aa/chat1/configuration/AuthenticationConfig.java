@@ -23,18 +23,21 @@ public class AuthenticationConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+        httpSecurity
                 .httpBasic().disable()
                 .csrf().disable()
                 .cors().and()
                 .authorizeRequests()
-                .requestMatchers("/api/v1/users/login","api/v1/users/join","/api/v1/users/main","/api/v1/users/userList/detail").permitAll() // join, login은 언제나 가능
-                .requestMatchers(HttpMethod.POST, "/ws/chat").authenticated()
+                .requestMatchers("/api/v1/users/login", "/api/v1/users/join").permitAll() // join, login은 언제나 가능
+                .requestMatchers(HttpMethod.POST, "/ws/chat", "/api/v1/users/userList/Detail").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/v1/users/main", "/api/v1/users/userList", "/api/v1/users/Chat/Users", "/api/v1/users/userList/Detail").authenticated() // GET 요청은 인증 필요
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // jwt사용하는 경우 씀
                 .and()
-                .addFilterBefore(new JwtFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class) //UserNamePasswordAuthenticationFilter적용하기 전에 JWTTokenFilter를 적용 하라는 뜻 입니다.
-                .build();
+                .addFilterBefore(new JwtFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class); //UserNamePasswordAuthenticationFilter적용하기 전에 JWTTokenFilter를 적용 하라는 뜻 입니다.
+
+        return httpSecurity.build();
     }
+
 }

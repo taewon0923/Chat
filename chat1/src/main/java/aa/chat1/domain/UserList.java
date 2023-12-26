@@ -1,5 +1,6 @@
 package aa.chat1.domain;
 
-public interface Users {
+public interface UserList {
     String getUserName();
+    String getId();
 }

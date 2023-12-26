@@ -24,4 +24,10 @@ public class User {
     private String password;
     private String phone;
     private String email;
+    private boolean isAdmin;
+
+    public User(String username, boolean isAdmin) {
+        this.userName = username;
+        this.isAdmin = isAdmin;
+    }
 }

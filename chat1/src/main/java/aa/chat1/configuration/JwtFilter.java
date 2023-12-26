@@ -24,10 +24,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final UserService userService;
 
-//    @Value("${jwt.secret}")
     private final String secretKey;
 
-    // 나머지 코드는 이전과 동일하게 유지됩니다.
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -53,6 +51,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String userName = JwtTokenUtil.getUserName(token, secretKey);
+        String admin = JwtTokenUtil.getIsAdmin(token, secretKey);
+
+        log.info(admin);
 
         // 권한 부여
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -61,9 +62,5 @@ public class JwtFilter extends OncePerRequestFilter {
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request, response);
-    }
-    public String getUser(String token){
-        String user = JwtTokenUtil.getUserName(token, secretKey);
-        return user;
     }
 }
